@@ -1,7 +1,6 @@
 {
   "name": "graphql-express-backend",
   "version": "1.0.0",
-  "main": "index.js",
   "repository": "git@github.com:chankruze/graphql-express-backend.git",
   "author": "chankruze <chankruze@geekofia.in>",
   "license": "GPL-3.0",
