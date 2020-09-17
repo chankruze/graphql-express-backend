@@ -8,8 +8,11 @@ Copyright (c) Geekofia 2020 and beyond
 const { GraphQLObjectType, GraphQLInt, GraphQLString, GraphQLBoolean, GraphQLList, GraphQLSchema, GraphQLFloat } = require('graphql')
 const axios = require('axios')
 
-const API_V4_LAUCHES = 'https://api.spacexdata.com/v4/launches'
-const API_V4_ROCKETS = 'https://api.spacexdata.com/v4/rockets'
+const API_V4 = 'https://api.spacexdata.com/v4'
+const END_LAUNCHES = '/launches'
+const END_ROCKETS = '/rockets'
+const END_LAUNCHPADS = '/launchpads'
+const END_SHIPS = '/ships'
 
 // Launch Type
 const LaunchType = new GraphQLObjectType({
@@ -28,17 +31,16 @@ const LaunchType = new GraphQLObjectType({
                 return axios.get(`${API_V4_ROCKETS}/${root.rocket}`).then(res => res.data)
             }
         },
-        links: { type: LinksType }
-    })
-})
-
-// Links Type
-const LinksType = new GraphQLObjectType({
-    name: 'Links',
-    fields: () => ({
-        webcast: { type: GraphQLString },
-        article: { type: GraphQLString },
-        wikipedia: { type: GraphQLString }
+        links: {
+            type: new GraphQLObjectType({
+                name: 'Links',
+                fields: () => ({
+                    webcast: { type: GraphQLString },
+                    article: { type: GraphQLString },
+                    wikipedia: { type: GraphQLString }
+                })
+            })
+        }
     })
 })
 
@@ -128,14 +130,66 @@ const RocketType = new GraphQLObjectType({
     })
 })
 
+// Launchpad Type
+const LaunchpadType = new GraphQLObjectType({
+    name: 'Launchpad',
+    fields: () => ({
+        id: { type: GraphQLString },
+        full_name: { type: GraphQLString },
+        locality: { type: GraphQLString },
+        region: { type: GraphQLString },
+        timezone: { type: GraphQLString },
+        latitude: { type: GraphQLFloat },
+        longitude: { type: GraphQLFloat },
+        launch_attempts: { type: GraphQLInt },
+        launch_successes: { type: GraphQLInt },
+        rockets: { type: new GraphQLList(GraphQLString) },
+        launches: { type: new GraphQLList(GraphQLString) },
+        details: { type: GraphQLString },
+        status: { type: GraphQLString },
+    })
+})
+
+// Ship Type
+const ShipType = new GraphQLObjectType({
+    name: 'Ship',
+    fields: () => ({
+        id: { type: GraphQLString },
+        legacy_id: { type: GraphQLString },
+        model: { type: GraphQLString },
+        type: { type: GraphQLString },
+        roles: { type: new GraphQLList(GraphQLString) },
+        imo: { type: GraphQLInt },
+        mmsi: { type: GraphQLInt },
+        abs: { type: GraphQLInt },
+        class: { type: GraphQLInt },
+        mass_kg: { type: GraphQLInt },
+        mass_lbs: { type: GraphQLInt },
+        year_built: { type: GraphQLInt },
+        home_port: { type: GraphQLString },
+        status: { type: GraphQLString },
+        speed_kn: { type: GraphQLInt },
+        course_deg: { type: GraphQLFloat },
+        latitude: { type: GraphQLFloat },
+        longitude: { type: GraphQLFloat },
+        last_ais_update: { type: GraphQLString },
+        link: { type: GraphQLString },
+        image: { type: GraphQLString },
+        launches: { type: new GraphQLList(GraphQLString) },
+        name: { type: GraphQLString },
+        active: { type: GraphQLBoolean },
+    })
+})
+
 // Root Query
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
+        // Launches
         launches: {
             type: new GraphQLList(LaunchType),
             resolve(parent, args) {
-                return axios.get(API_V4_LAUCHES).then(res => res.data)
+                return axios.get(`${API_V4}${END_LAUNCHES}`).then(res => res.data)
             }
         },
         launch: {
@@ -144,7 +198,14 @@ const RootQuery = new GraphQLObjectType({
                 id: { type: GraphQLString }
             },
             resolve(parent, args) {
-                return axios.get(`${API_V4_LAUCHES}/${args.id}`).then(res => res.data)
+                return axios.get(`${API_V4}${END_LAUNCHES}/${args.id}`).then(res => res.data)
+            }
+        },
+        // Rockets
+        rockets: {
+            type: new GraphQLList(RocketType),
+            resolve(parent, args) {
+                return axios.get(`${API_V4}${END_ROCKETS}`).then(res => res.data)
             }
         },
         rocket: {
@@ -153,9 +214,41 @@ const RootQuery = new GraphQLObjectType({
                 id: { type: GraphQLString }
             },
             resolve(parent, args) {
-                return axios.get(`${API_V4_ROCKETS}/${args.id}`).then(res => res.data)
+                return axios.get(`${API_V4}${END_ROCKETS}/${args.id}`).then(res => res.data)
             }
-        }
+        },
+        // Launchpads
+        launchpads: {
+            type: new GraphQLList(LaunchpadType),
+            resolve(parent, args) {
+                return axios.get(`${API_V4}${END_LAUNCHPADS}`).then(res => res.data)
+            }
+        },
+        launchpad: {
+            type: LaunchpadType,
+            args: {
+                id: { type: GraphQLString }
+            },
+            resolve(parent, args) {
+                return axios.get(`${API_V4}${END_LAUNCHPADS}/${args.id}`).then(res => res.data)
+            }
+        },
+        // Ships
+        ships: {
+            type: new GraphQLList(ShipType),
+            resolve(parent, args) {
+                return axios.get(`${API_V4}${END_SHIPS}`).then(res => res.data)
+            }
+        },
+        ship: {
+            type: ShipType,
+            args: {
+                id: { type: GraphQLString }
+            },
+            resolve(parent, args) {
+                return axios.get(`${API_V4}${END_SHIPS}/${args.id}`).then(res => res.data)
+            }
+        },
     }
 })
 
