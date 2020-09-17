@@ -22,7 +22,8 @@ const LaunchType = new GraphQLObjectType({
         flight_number: { type: GraphQLInt },
         name: { type: GraphQLString },
         success: { type: GraphQLBoolean },
-        date_local: { type: GraphQLString },
+        date_utc: { type: GraphQLString },
+        date_local: {type: GraphQLString},
         lunchpad: { type: GraphQLString },
         rocket: { type: GraphQLString },
         rocket_details: {
@@ -35,6 +36,36 @@ const LaunchType = new GraphQLObjectType({
             type: new GraphQLObjectType({
                 name: 'Links',
                 fields: () => ({
+                    patch: {
+                        type: new GraphQLObjectType({
+                            name: 'Patch',
+                            fields: () => ({
+                                small: { type: GraphQLString },
+                                large: { type: GraphQLString },
+                            })
+                        })
+                    },
+                    reddit: {
+                        type: new GraphQLObjectType({
+                            name: 'Reddit',
+                            fields: () => ({
+                                campaign: { type: GraphQLString },
+                                launch: { type: GraphQLString },
+                                media: { type: GraphQLString },
+                                recovery: { type: GraphQLString },
+                            })
+                        })
+                    },
+                    flickr: {
+                        type: new GraphQLObjectType({
+                            name: 'Flickr',
+                            fields: () => ({
+                                small: { type: new GraphQLList(GraphQLString) },
+                                original: { type: new GraphQLList(GraphQLString) },
+                            })
+                        })
+                    },
+                    presskit: { type: GraphQLString },
                     webcast: { type: GraphQLString },
                     article: { type: GraphQLString },
                     wikipedia: { type: GraphQLString }
