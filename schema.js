@@ -28,7 +28,7 @@ const LaunchType = new GraphQLObjectType({
         rocket_details: {
             type: RocketType,
             resolve(root, parent, args) {
-                return axios.get(`${API_V4_ROCKETS}/${root.rocket}`).then(res => res.data)
+                return axios.get(`${API_V4}${END_ROCKETS}/${root.rocket}`).then(res => res.data)
             }
         },
         links: {
