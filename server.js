@@ -15,7 +15,7 @@ const path = require('path')
 const app = express()
 app.use(cors())
 
-app.use('/',
+app.use('/graphql',
     graphqlHTTP({
         schema,
         graphiql: true,
