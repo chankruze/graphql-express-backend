@@ -22,15 +22,42 @@ const LaunchType = new GraphQLObjectType({
         flight_number: { type: GraphQLInt },
         name: { type: GraphQLString },
         success: { type: GraphQLBoolean },
+        static_fire_date_utc: { type: GraphQLString },
+        static_fire_date_unix: { type: GraphQLInt },
         date_utc: { type: GraphQLString },
-        date_local: {type: GraphQLString},
+        date_local: { type: GraphQLString },
+        date_unix: { type: GraphQLInt },
         lunchpad: { type: GraphQLString },
+        details: { type: GraphQLString },
         rocket: { type: GraphQLString },
-        rocket_details: {
-            type: RocketType,
-            resolve(root, parent, args) {
-                return axios.get(`${API_V4}${END_ROCKETS}/${root.rocket}`).then(res => res.data)
-            }
+        upcoming: { type: GraphQLBoolean },
+        crew: { type: new GraphQLList(GraphQLString) },
+        ships: { type: new GraphQLList(GraphQLString) },
+        capsules: { type: new GraphQLList(GraphQLString) },
+        payloads: { type: new GraphQLList(GraphQLString) },
+        failures: { type: new GraphQLList(GraphQLString) },
+        window: { type: GraphQLInt },
+        // rocket_details: {
+        //     type: RocketType,
+        //     resolve(root, parent, args) {
+        //         return axios.get(`${API_V4}${END_ROCKETS}/${root.rocket}`).then(res => res.data)
+        //     }
+        // },
+        cores: {
+            type: new GraphQLObjectType({
+                name: 'Cores',
+                fields: () => ({
+                    core: { type: GraphQLString },
+                    flight: { type: GraphQLInt },
+                    gridfins: { type: GraphQLBoolean },
+                    legs: { type: GraphQLBoolean },
+                    reused: { type: GraphQLBoolean },
+                    landing_attempt: { type: GraphQLBoolean },
+                    landing_success: { type: GraphQLBoolean },
+                    landing_type: { type: GraphQLString },
+                    landpad: { type: GraphQLString },
+                })
+            })
         },
         links: {
             type: new GraphQLObjectType({
@@ -97,7 +124,7 @@ const RocketType = new GraphQLObjectType({
                 name: 'Height',
                 fields: () => ({
                     meters: { type: GraphQLFloat },
-                    feet: { type: GraphQLInt }
+                    feet: { type: GraphQLFloat }
                 })
             })
         },
@@ -106,7 +133,7 @@ const RocketType = new GraphQLObjectType({
                 name: 'Diameter',
                 fields: () => ({
                     meters: { type: GraphQLFloat },
-                    feet: { type: GraphQLInt }
+                    feet: { type: GraphQLFloat }
                 })
             })
         },
@@ -114,8 +141,8 @@ const RocketType = new GraphQLObjectType({
             type: new GraphQLObjectType({
                 name: 'Mass',
                 fields: () => ({
-                    kg: { type: GraphQLInt },
-                    lb: { type: GraphQLInt }
+                    kg: { type: GraphQLFloat },
+                    lb: { type: GraphQLFloat }
                 })
             })
         },
@@ -130,7 +157,7 @@ const RocketType = new GraphQLObjectType({
                     engine_loss_max: { type: GraphQLInt },
                     propellant_1: { type: GraphQLString },
                     propellant_2: { type: GraphQLString },
-                    thrust_to_weight: { type: GraphQLInt }
+                    thrust_to_weight: { type: GraphQLFloat }
                 })
             })
         },
