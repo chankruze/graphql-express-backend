@@ -247,6 +247,7 @@ const LaunchpadType = new GraphQLObjectType({
     name: 'Launchpad',
     fields: () => ({
         id: { type: GraphQLString },
+        name: { type: GraphQLString },
         full_name: { type: GraphQLString },
         locality: { type: GraphQLString },
         region: { type: GraphQLString },
