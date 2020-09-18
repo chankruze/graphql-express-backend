@@ -10,16 +10,23 @@ const { graphqlHTTP } = require('express-graphql')
 const schema = require('./schema')
 const os = require('os')
 const cors = require('cors')
+const path = require('path')
 
 const app = express()
 app.use(cors())
 
-app.use('/graphql',
+app.use('/',
     graphqlHTTP({
         schema,
         graphiql: true,
     })
 )
+
+app.use(express.static('public'))
+
+app.get('*', (re, res) => {
+    res.sendFile(path.resolve(__dirname, 'public', 'index.html'))
+})
 
 const PORT = process.env.PORT || 5005
 const networkInterfaces = os.networkInterfaces()
