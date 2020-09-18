@@ -15,7 +15,7 @@ const END_LAUNCHPADS = '/launchpads'
 const END_SHIPS = '/ships'
 
 // Launch Type
-const LaunchType = new GraphQLObjectType({
+const FullLaunchType = new GraphQLObjectType({
     name: 'Launch',
     fields: () => ({
         id: { type: GraphQLString },
@@ -27,7 +27,7 @@ const LaunchType = new GraphQLObjectType({
         date_utc: { type: GraphQLString },
         date_local: { type: GraphQLString },
         date_unix: { type: GraphQLInt },
-        lunchpad: { type: GraphQLString },
+        launchpad: { type: GraphQLString },
         details: { type: GraphQLString },
         rocket: { type: GraphQLString },
         upcoming: { type: GraphQLBoolean },
@@ -35,70 +35,96 @@ const LaunchType = new GraphQLObjectType({
         ships: { type: new GraphQLList(GraphQLString) },
         capsules: { type: new GraphQLList(GraphQLString) },
         payloads: { type: new GraphQLList(GraphQLString) },
-        failures: { type: new GraphQLList(GraphQLString) },
+        failures: { type: new GraphQLList(FailureObjectType) },
         window: { type: GraphQLInt },
-        // rocket_details: {
-        //     type: RocketType,
-        //     resolve(root, parent, args) {
-        //         return axios.get(`${API_V4}${END_ROCKETS}/${root.rocket}`).then(res => res.data)
-        //     }
-        // },
-        cores: {
+        cores: { type: GraphQLList(CoreObjectType) },
+        links: { type: LaunchLinkType }
+    })
+})
+
+
+// Min Launch Type
+const CardLaunchType = new GraphQLObjectType({
+    name: 'LaunchCard',
+    fields: () => ({
+        // id
+        id: { type: GraphQLString },
+        // flight number
+        flight_number: { type: GraphQLInt },
+        // links (webcast, article, wiki)
+        links: { type: LaunchLinkType },
+        // success
+        success: { type: GraphQLBoolean },
+        // date UTC
+        date_utc: { type: GraphQLString },
+        // name
+        name: { type: GraphQLString },
+    })
+})
+
+// Launch Link Type
+const LaunchLinkType = new GraphQLObjectType({
+    name: 'Links',
+    fields: () => ({
+        patch: {
             type: new GraphQLObjectType({
-                name: 'Cores',
+                name: 'Patch',
                 fields: () => ({
-                    core: { type: GraphQLString },
-                    flight: { type: GraphQLInt },
-                    gridfins: { type: GraphQLBoolean },
-                    legs: { type: GraphQLBoolean },
-                    reused: { type: GraphQLBoolean },
-                    landing_attempt: { type: GraphQLBoolean },
-                    landing_success: { type: GraphQLBoolean },
-                    landing_type: { type: GraphQLString },
-                    landpad: { type: GraphQLString },
+                    small: { type: GraphQLString },
+                    large: { type: GraphQLString },
                 })
             })
         },
-        links: {
+        reddit: {
             type: new GraphQLObjectType({
-                name: 'Links',
+                name: 'Reddit',
                 fields: () => ({
-                    patch: {
-                        type: new GraphQLObjectType({
-                            name: 'Patch',
-                            fields: () => ({
-                                small: { type: GraphQLString },
-                                large: { type: GraphQLString },
-                            })
-                        })
-                    },
-                    reddit: {
-                        type: new GraphQLObjectType({
-                            name: 'Reddit',
-                            fields: () => ({
-                                campaign: { type: GraphQLString },
-                                launch: { type: GraphQLString },
-                                media: { type: GraphQLString },
-                                recovery: { type: GraphQLString },
-                            })
-                        })
-                    },
-                    flickr: {
-                        type: new GraphQLObjectType({
-                            name: 'Flickr',
-                            fields: () => ({
-                                small: { type: new GraphQLList(GraphQLString) },
-                                original: { type: new GraphQLList(GraphQLString) },
-                            })
-                        })
-                    },
-                    presskit: { type: GraphQLString },
-                    webcast: { type: GraphQLString },
-                    article: { type: GraphQLString },
-                    wikipedia: { type: GraphQLString }
+                    campaign: { type: GraphQLString },
+                    launch: { type: GraphQLString },
+                    media: { type: GraphQLString },
+                    recovery: { type: GraphQLString },
                 })
             })
-        }
+        },
+        flickr: {
+            type: new GraphQLObjectType({
+                name: 'Flickr',
+                fields: () => ({
+                    small: { type: new GraphQLList(GraphQLString) },
+                    original: { type: new GraphQLList(GraphQLString) },
+                })
+            })
+        },
+        presskit: { type: GraphQLString },
+        webcast: { type: GraphQLString },
+        article: { type: GraphQLString },
+        wikipedia: { type: GraphQLString }
+    })
+})
+
+// Failure Type
+const FailureObjectType = new GraphQLObjectType({
+    name: 'Failure',
+    fields: () => ({
+        time: { type: GraphQLFloat },
+        altitude: { type: GraphQLFloat },
+        reason: { type: GraphQLString },
+    })
+})
+
+// Core Type
+const CoreObjectType = new GraphQLObjectType({
+    name: 'Core',
+    fields: () => ({
+        core: { type: GraphQLString },
+        flight: { type: GraphQLInt },
+        gridfins: { type: GraphQLBoolean },
+        legs: { type: GraphQLBoolean },
+        reused: { type: GraphQLBoolean },
+        landing_attempt: { type: GraphQLBoolean },
+        landing_success: { type: GraphQLBoolean },
+        landing_type: { type: GraphQLString },
+        landpad: { type: GraphQLString },
     })
 })
 
@@ -157,13 +183,41 @@ const RocketType = new GraphQLObjectType({
                     engine_loss_max: { type: GraphQLInt },
                     propellant_1: { type: GraphQLString },
                     propellant_2: { type: GraphQLString },
-                    thrust_to_weight: { type: GraphQLFloat }
+                    thrust_to_weight: { type: GraphQLFloat },
+                    isp: {
+                        type: new GraphQLObjectType({
+                            name: 'Isp',
+                            fields: () => ({
+                                sea_level: { type: GraphQLInt },
+                                vacuum: { type: GraphQLInt }
+                            })
+                        })
+                    },
+                    thrust_sea_level: {
+                        type: new GraphQLObjectType({
+                            name: 'Thrust_sea_level',
+                            fields: () => ({
+                                kN: { type: GraphQLInt },
+                                lbf: { type: GraphQLInt }
+                            })
+                        })
+                    },
+                    thrust_vacuum: {
+                        type: new GraphQLObjectType({
+                            name: 'Thrust_vacuum',
+                            fields: () => ({
+                                kN: { type: GraphQLInt },
+                                lbf: { type: GraphQLInt }
+                            })
+                        })
+                    },
+                    flickr_images: { type: new GraphQLList(GraphQLString) }
                 })
             })
         },
         landing_legs: {
             type: new GraphQLObjectType({
-                name: 'Landing_Legs',
+                name: 'landing_Legs',
                 fields: () => ({
                     number: { type: GraphQLInt },
                     material: { type: GraphQLString }
@@ -172,7 +226,7 @@ const RocketType = new GraphQLObjectType({
         },
         payload_weights: {
             type: new GraphQLList(new GraphQLObjectType({
-                name: 'Payload_Weights',
+                name: 'payload_weights',
                 fields: () => ({
                     id: { type: GraphQLString },
                     name: { type: GraphQLString },
@@ -182,7 +236,7 @@ const RocketType = new GraphQLObjectType({
             }))
         },
         flickr_images: {
-            name: 'Flickr_Images',
+            name: 'flickr_images',
             type: new GraphQLList(GraphQLString)
         }
     })
@@ -245,13 +299,13 @@ const RootQuery = new GraphQLObjectType({
     fields: {
         // Launches
         launches: {
-            type: new GraphQLList(LaunchType),
+            type: new GraphQLList(CardLaunchType),
             resolve(parent, args) {
                 return axios.get(`${API_V4}${END_LAUNCHES}`).then(res => res.data)
             }
         },
         launch: {
-            type: LaunchType,
+            type: FullLaunchType,
             args: {
                 id: { type: GraphQLString }
             },
